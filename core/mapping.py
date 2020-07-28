@@ -88,11 +88,11 @@ def cache_geometry(updater=None, first_tanggal=FIRST_TANGGAL_STR):
     layer = updater.get_layer(REAL_LAYER_ID)
     updater.cache_kabko_geometry(layer, util.format_date(first_tanggal))
     
-def update_map_all(predict_days=PREDICT_DAYS, max_process_count=None, max_tasks_per_child=10, pool=None, inner_max_process_count=1, inner_max_tasks_per_child=100):
+def update_map_all(predict_days=PREDICT_DAYS, any=False, max_process_count=None, max_tasks_per_child=10, pool=None, inner_max_process_count=1, inner_max_tasks_per_child=100):
     latest_tanggal = None
     with database.get_conn() as conn, conn.cursor() as cur:
         #latest_tanggal = MapDataRepo.get_latest_tanggal(cur)
-        kabko = MapDataRepo.fetch_kabko_need_mapping(latest_tanggal, cur)
+        kabko = MapDataRepo.fetch_kabko_need_mapping(latest_tanggal, any=any, cur)
         
     print("%s kabko needs updating" % (str(len(kabko)),))
             

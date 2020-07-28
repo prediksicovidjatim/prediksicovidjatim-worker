@@ -18,7 +18,6 @@ from threading import RLock
 
 fit_lock = RLock()
 
-@lprofile
 def fit(selected_kabko, test_splits=[], tanggal=None, kabko=None, db=None):
     print("Fitting %s with %s test_splits" % (selected_kabko, str(test_splits)))
     #sys.stdout.flush()
@@ -37,21 +36,24 @@ def fit(selected_kabko, test_splits=[], tanggal=None, kabko=None, db=None):
     print("Done fitting %s with %s test_splits" % (selected_kabko, str(test_splits)))
     #sys.stdout.flush()
     
-@lprofile
-def fit_all(test_splits=[], kabko=None, max_process_count=1, max_tasks_per_child=None, pool=None):
+def fit_all(test_splits=[], max_process_count=1, max_tasks_per_child=None, pool=None):
     with database.get_conn() as conn, conn.cursor() as cur:
         latest_tanggal = ModelDataRepo.get_latest_tanggal(cur)
-        if not kabko:
-            kabko = ModelDataRepo.fetch_kabko_need_fitting(latest_tanggal, cur)
+        kabko = ModelDataRepo.fetch_kabko_need_fitting(latest_tanggal, cur)
             
     print("Fitting %s kabko with %s test_splits and %s process" % (str(len(kabko)), str(test_splits), str(max_process_count)))
     
-    args = [(k, test_splits, latest_tanggal, None, database.singleton) for k in kabko]
     
     if not pool and max_process_count == 1:
+        '''
+        with db.get_conn() as conn, conn.cursor() as cur:
+            kabko_full = {k:ModelDataRepo.get_kabko_full(k, cur=cur) for k in kabko}
+        '''
+        args = [(k, test_splits, latest_tanggal, None, database.singleton) for k in kabko
         for arg in args:
             fit(*arg)
     else:
+        args = [(k, test_splits, latest_tanggal, None, database.singleton) for k in kabko]
         gc.collect()
         pool = pool or Pool(processes=max_process_count, maxtasksperchild=max_tasks_per_child)
         #pool = pool or ThreadPool(processes=util.min_none(len(args), max_process_count))

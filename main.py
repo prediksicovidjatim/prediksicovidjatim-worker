@@ -7,6 +7,11 @@ from prediksicovidjatim.data.model import ModelDataRepo
 from prediksicovidjatim.util import Pool
 
 K_TEST = os.getenv("K_TEST")
+PREDICT_DAYS = 30
+try:
+    PREDICT_DAYS = int(os.getenv("PREDICT_DAYS"))
+except Exception:
+    pass
 
 def init():
     database.init()
@@ -15,27 +20,27 @@ def init():
         ModelDataRepo.init_weights(cur)
         
 def scrap():
-    from .core import scraping
+    from core import scraping
     scraping.scrap_new_data()
         
 def scrap_covid():
-    from .core import scraping
+    from core import scraping
     scraping.scrap_new_covid_data()
     
 def scrap_hospital():
-    from .core import scraping
+    from core import scraping
     scraping.scrap_new_hospital_data()
     
-def map():
-    from .core import mapping
+def map(predict_days=PREDICT_DAYS, any=False):
+    from core import mapping
     mapping.init()
-    mapping.update_map_all()
+    mapping.update_map_all(predict_days=predict_days, any=any)
     
 def fit(test=False):
-    from .core import fitting
+    from core import fitting
     if test:
         test_splits = [K_TEST]
     else:
         test_splits = []
-    fitting.fit_all(test_splits, pool=fit_pool)
+    fitting.fit_all(test_splits)
     
