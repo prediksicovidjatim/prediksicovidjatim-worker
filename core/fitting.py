@@ -49,7 +49,7 @@ def fit_all(test_splits=[], max_process_count=1, max_tasks_per_child=None, pool=
         with db.get_conn() as conn, conn.cursor() as cur:
             kabko_full = {k:ModelDataRepo.get_kabko_full(k, cur=cur) for k in kabko}
         '''
-        args = [(k, test_splits, latest_tanggal, None, database.singleton) for k in kabko
+        args = [(k, test_splits, latest_tanggal, None, database.singleton) for k in kabko]
         for arg in args:
             fit(*arg)
     else:
