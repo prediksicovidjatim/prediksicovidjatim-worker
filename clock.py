@@ -1,6 +1,7 @@
 import sys
 import main
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from datetime import datetime
 import traceback
 import os
@@ -34,12 +35,19 @@ try:
     MINUTE = int(os.getenv("WORK_MINUTE"))
 except Exception:
     pass
+    
+    
 
-sched = BlockingScheduler()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-#@sched.scheduled_job('interval', minutes=3)
+jobstores = {
+    'default': SQLAlchemyJobStore(url=DATABASE_URL)
+}
+sched = BlockingScheduler(jobstores=jobstores)
+
+#@sched.scheduled_job('interval', seconds=10)
 def timed_job():
-    print('This job is run every three minutes.')
+    print('This job is run every 10 seconds.')
 
 #@sched.scheduled_job('cron', hour=19, minute=0, timezone=tz)
 def daily_job():
@@ -80,13 +88,13 @@ def weekly_job_2():
 
 def start_sched():
     next_run_time = datetime.now() if DEBUG else None
-    #sched.add_job(timed_job, 'interval', minutes=3)
+    sched.add_job(timed_job, 'interval', seconds=10, misfire_grace_time=1)
     if MODE == "daily":
-        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time )
+        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
     elif MODE == "fit_quick":
-        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time)
+        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
     elif MODE == "fit_test":
-        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time)
+        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
     else:
         raise Exception("Invalid mode: " + str(MODE))
     sched.start()
