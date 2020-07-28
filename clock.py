@@ -37,6 +37,9 @@ except Exception:
 
 sched = BlockingScheduler()
 
+@sched.scheduled_job('interval', minutes=3)
+def timed_job():
+    print('This job is run every three minutes.')
 
 #@sched.scheduled_job('cron', hour=19, minute=0, timezone=tz)
 def daily_job():
