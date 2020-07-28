@@ -3,7 +3,9 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import traceback
 
-tz = datetime.timezone(datetime.timedelta(hours=7))
+from pytz import timezone
+
+tz = timezone("Asia/Jakarta")
 
 sched = BlockingScheduler()
 
