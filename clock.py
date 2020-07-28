@@ -80,7 +80,7 @@ def weekly_job_2():
 
 def start_sched():
     next_run_time = datetime.now() if DEBUG else None
-    sched.add_job(timed_job, 'interval', minutes=3)
+    #sched.add_job(timed_job, 'interval', minutes=3)
     if MODE == "daily":
         sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time )
     elif MODE == "fit_quick":
