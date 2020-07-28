@@ -1,4 +1,4 @@
-from . import main
+import main
 from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import traceback
