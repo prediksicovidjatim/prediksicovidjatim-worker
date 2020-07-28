@@ -6,7 +6,12 @@ from prediksicovidjatim import database, config
 from prediksicovidjatim.data.model import ModelDataRepo
 from prediksicovidjatim.util import Pool
 
-K_TEST = os.getenv("K_TEST")
+K_TEST = 3
+try:
+    K_TEST = int(os.getenv("K_TEST"))
+except Exception:
+    pass
+
 PREDICT_DAYS = 30
 try:
     PREDICT_DAYS = int(os.getenv("PREDICT_DAYS"))

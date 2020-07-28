@@ -12,7 +12,17 @@ from pytz import timezone
 tz = timezone("Asia/Jakarta")
 
 MODE = os.getenv("WORKER_MODE")
+
 DEBUG = os.getenv("WORKER_DEBUG")
+if DEBUG:
+    if DEBUG.lower() == "false":
+        DEBUG = False
+    else:
+        try:
+            DEBUG = int(DEBUG)
+        except Exception:
+            DEBUG = True
+
 DAY = os.getenv("WORK_DAY")
 HOUR = 1
 try:
