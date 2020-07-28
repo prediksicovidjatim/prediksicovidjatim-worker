@@ -11,8 +11,19 @@ from pytz import timezone
 
 tz = timezone("Asia/Jakarta")
 
-mode = os.getenv("WORKER_MODE")
-debug = os.getenv("WORKER_DEBUG")
+MODE = os.getenv("WORKER_MODE")
+DEBUG = os.getenv("WORKER_DEBUG")
+DAY = os.getenv("WORK_DAY")
+HOUR = 1
+try:
+    HOUR = int(os.getenv("WORK_HOUR"))
+except Exception:
+    pass
+MINUTE = 1
+try:
+    MINUTE = int(os.getenv("WORK_MINUTE"))
+except Exception:
+    pass
 
 sched = BlockingScheduler()
 
@@ -25,7 +36,7 @@ def daily_job():
     except Exception as ex:
         traceback.print_exc()
     try:
-        main.map(predict_days=0, any=True)
+        main.map(any=True)
     except Exception as ex:
         traceback.print_exc()
     
@@ -38,7 +49,7 @@ def weekly_job_1():
     except Exception as ex:
         traceback.print_exc()
     try:
-        main.map()
+        main.map(any=True)
     except Exception as ex:
         traceback.print_exc()
     
@@ -50,20 +61,20 @@ def weekly_job_2():
     except Exception as ex:
         traceback.print_exc()
     try:
-        main.map()
+        main.map(any=True)
     except Exception as ex:
         traceback.print_exc()
 
 def start_sched():
-    next_run_time = datetime.now() if debug else None
-    if mode == "daily":
-        sched.add_job(daily_job, 'cron', hour=0, minute=10, timezone=tz, max_instances=1, next_run_time=next_run_time )
-    elif mode == "fit_quick":
-        sched.add_job(weekly_job_1, 'cron', day_of_week='wed', hour=1, minute=0, timezone=tz, max_instances=1, next_run_time=next_run_time)
-    elif mode == "fit_test":
-        sched.add_job(weekly_job_2, 'cron', day_of_week='sun', hour=1, minute=0, timezone=tz, max_instances=1, next_run_time=next_run_time)
+    next_run_time = datetime.now() if DEBUG else None
+    if MODE == "daily":
+        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time )
+    elif MODE == "fit_quick":
+        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time)
+    elif MODE == "fit_test":
+        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time)
     else:
-        raise Exception("Invalid mode: " + str(mode))
+        raise Exception("Invalid mode: " + str(MODE))
     sched.start()
     
 start_sched()
