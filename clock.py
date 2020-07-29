@@ -121,11 +121,10 @@ def start_sched():
     
     #sched.add_job(timed_job, 'interval', seconds=10, misfire_grace_time=1, id='timed_job')
     #print("Added timed_job")
-    
-    minute = 58
+    minute = MINUTE
     for i in range (0, 24):
         sched.add_job(lambda: cron_job(i, minute), 'cron', hour=i, minute=minute, timezone=tz, max_instances=1, misfire_grace_time=600)
-    
+        
     if MODE == "daily":
         sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, misfire_grace_time=600, id='daily_job')
         print("Added daily_job")
