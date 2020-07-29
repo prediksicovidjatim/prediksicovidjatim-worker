@@ -84,7 +84,8 @@ def weekly_job_2():
         main.map(any=True)
     except Exception as ex:
         traceback.print_exc()
-        
+
+'''
 TABLE_NAME = "apscheduler_" + WORKER_NAME
 jobstores = {
     'default': SQLAlchemyJobStore(
@@ -93,6 +94,9 @@ jobstores = {
     )
 }
 sched = BlockingScheduler(jobstores=jobstores)
+'''
+
+sched = BlockingScheduler()
 
 def try_remove_job(job_id):
     try:
@@ -132,4 +136,5 @@ def restart_sched():
     start_sched()
     
 if __name__ == '__main__':
-    restart_sched()
+    #restart_sched()
+    start_sched()

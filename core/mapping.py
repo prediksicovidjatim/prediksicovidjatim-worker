@@ -56,7 +56,7 @@ def _update_map(updater, layer_id, selected_kabko, layer_data, update=True, chun
     return updater.save(layer, selected_kabko, layer_data, update=update, chunk_size=chunk_size, max_process_count=max_process_count, max_tasks_per_child=max_tasks_per_child)
 
 def update_map(selected_kabko, chunk_size=100, tanggal=None, predict_days=PREDICT_DAYS, updater=None, db=None, max_process_count=None, max_tasks_per_child=2):
-    print("Updating maps of %s" % (selected_kabko,))
+    #print("Updating maps of %s" % (selected_kabko,))
     updater = updater or get_updater(chunk_size=chunk_size)
     
     db = db or database

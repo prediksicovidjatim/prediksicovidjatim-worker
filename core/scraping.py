@@ -21,6 +21,7 @@ def _scrap_new_covid_data(scrapper, kabko, tanggal, max_process_count=6):
         data = scrapper.scrap_bulk(kabko, [t], max_process_count)
         RawDataRepo.save_data([d.to_db_row() for d in data])
         print("Done scraping: " + t)
+    print("Done scraping %s days of data" % (l,))
     return len(tanggal)
         
 def scrap_new_covid_data():
