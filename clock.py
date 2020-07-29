@@ -47,6 +47,9 @@ WORKER_NAME = os.getenv("WORKER_NAME")
 #@sched.scheduled_job('interval', seconds=10)
 def timed_job():
     print('This job is run every 10 seconds.')
+    
+def cron_job(hour, minute):
+    print('this job is run at hour=%d minute=%d' % (hour, minute))
 
 #@sched.scheduled_job('cron', hour=19, minute=0, timezone=tz)
 def daily_job():
@@ -117,15 +120,24 @@ def clear_job():
 def start_sched():
     
     #sched.add_job(timed_job, 'interval', seconds=10, misfire_grace_time=1, id='timed_job')
+    #print("Added timed_job")
     
-    next_run_time = datetime.now() if DEBUG else None
+    minute = 58
+    for i in range (0, 24):
+        sched.add_job(lambda: cron_job(i, minute), 'cron', hour=i, minute=minute, timezone=tz, max_instances=1, misfire_grace_time=600)
     
     if MODE == "daily":
-        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='daily_job')
+        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, misfire_grace_time=600, id='daily_job')
+        print("Added daily_job")
+        print("Job scheduled for run daily at %s:%s" % (str(HOUR), str(MINUTE)))
     elif MODE == "fit_quick":
-        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='weekly_job_1')
+        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, misfire_grace_time=600, id='weekly_job_1')
+        print("Added weekly_job_1")
+        print("Job scheduled for run at %s, %s:%s" % (DAY, str(HOUR), str(MINUTE)))
     elif MODE == "fit_test":
-        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='weekly_job_2')
+        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, misfire_grace_time=600, id='weekly_job_2')
+        print("Added weekly_job_2")
+        print("Job scheduled for run at %s, %s:%s" % (DAY, str(HOUR), str(MINUTE)))
     else:
         raise Exception("Invalid mode: " + str(MODE))
         
