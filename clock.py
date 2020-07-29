@@ -1,5 +1,6 @@
 import sys
 import main
+from prediksicovidjatim import database
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.jobstores.base import JobLookupError
@@ -84,11 +85,11 @@ def weekly_job_2():
     except Exception as ex:
         traceback.print_exc()
         
-        
+TABLE_NAME = "apscheduler_" + WORKER_NAME
 jobstores = {
     'default': SQLAlchemyJobStore(
         url=DATABASE_URL, 
-        tablename="apscheduler_" + WORKER_NAME
+        tablename=TABLE_NAME
     )
 }
 sched = BlockingScheduler(jobstores=jobstores)
@@ -104,6 +105,8 @@ def clear_job():
     try_remove_job('daily_job')
     try_remove_job('weekly_job_1')
     try_remove_job('weekly_job_2')
+    with database.get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM " + TABLE_NAME)
 
 def start_sched():
     

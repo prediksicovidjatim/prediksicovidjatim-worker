@@ -119,7 +119,7 @@ def update_map_all(predict_days=PREDICT_DAYS, any=True, max_process_count=None, 
             output = pool.starmap(update_map, args)
             pool.close()
             pool.join()
-            print("Done updating maks of %s kabko" % (len(args),))
+            print("Done updating maps of %s kabko" % (len(args),))
         except ConnectionError as ex:
             raise
         finally:
