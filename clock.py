@@ -2,6 +2,7 @@ import sys
 import main
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.base import JobLookupError
 from datetime import datetime
 import traceback
 import os
@@ -39,11 +40,8 @@ except Exception:
     
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+WORKER_NAME = os.getenv("WORKER_NAME")
 
-jobstores = {
-    'default': SQLAlchemyJobStore(url=DATABASE_URL)
-}
-sched = BlockingScheduler(jobstores=jobstores)
 
 #@sched.scheduled_job('interval', seconds=10)
 def timed_job():
@@ -85,18 +83,48 @@ def weekly_job_2():
         main.map(any=True)
     except Exception as ex:
         traceback.print_exc()
+        
+        
+jobstores = {
+    'default': SQLAlchemyJobStore(
+        url=DATABASE_URL, 
+        tablename="apscheduler_" + WORKER_NAME
+    )
+}
+sched = BlockingScheduler(jobstores=jobstores)
+
+def try_remove_job(job_id):
+    try:
+        sched.remove_job(job_id)
+    except JobLookupError as ex:
+        pass
+        
+def clear_job():
+    try_remove_job('timed_job')
+    try_remove_job('daily_job')
+    try_remove_job('weekly_job_1')
+    try_remove_job('weekly_job_2')
 
 def start_sched():
+    
+    #sched.add_job(timed_job, 'interval', seconds=10, misfire_grace_time=1, id='timed_job')
+    
     next_run_time = datetime.now() if DEBUG else None
-    #sched.add_job(timed_job, 'interval', seconds=10, misfire_grace_time=1)
+    
     if MODE == "daily":
-        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
+        sched.add_job(daily_job, 'cron', hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='daily_job')
     elif MODE == "fit_quick":
-        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
+        sched.add_job(weekly_job_1, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='weekly_job_1')
     elif MODE == "fit_test":
-        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600)
+        sched.add_job(weekly_job_2, 'cron', day_of_week=DAY, hour=HOUR, minute=MINUTE, timezone=tz, max_instances=1, next_run_time=next_run_time, misfire_grace_time=600, id='weekly_job_2')
     else:
         raise Exception("Invalid mode: " + str(MODE))
+        
     sched.start()
     
-start_sched()
+def restart_sched():
+    clear_job()
+    start_sched()
+    
+if __name__ == '__main__':
+    start_sched()
