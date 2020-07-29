@@ -36,10 +36,10 @@ def scrap_hospital():
     from core import scraping
     scraping.scrap_new_hospital_data()
     
-def map(predict_days=PREDICT_DAYS, any=False):
+def map(predict_days=PREDICT_DAYS, update_prediction=True, any=False):
     from core import mapping
     mapping.init()
-    mapping.update_map_all(predict_days=predict_days, any=any)
+    mapping.update_map_all(predict_days=predict_days, update_prediction=update_prediction, any=any)
     
 def fit(test=False):
     from core import fitting

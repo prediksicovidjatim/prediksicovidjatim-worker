@@ -56,7 +56,7 @@ def daily_job():
     except Exception as ex:
         traceback.print_exc()
     try:
-        main.map(any=True)
+        main.map(update_prediction=False, any=True)
     except Exception as ex:
         traceback.print_exc()
     
