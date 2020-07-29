@@ -105,8 +105,10 @@ def clear_job():
     try_remove_job('daily_job')
     try_remove_job('weekly_job_1')
     try_remove_job('weekly_job_2')
+    database.init()
     with database.get_conn() as conn, conn.cursor() as cur:
         cur.execute("DELETE FROM " + TABLE_NAME)
+        conn.commit()
 
 def start_sched():
     
@@ -130,4 +132,4 @@ def restart_sched():
     start_sched()
     
 if __name__ == '__main__':
-    start_sched()
+    restart_sched()
