@@ -55,7 +55,7 @@ def _update_map(updater, layer_id, selected_kabko, layer_data, update=True, chun
     layer = updater.get_layer(layer_id)
     return updater.save(layer, selected_kabko, layer_data, update=update, chunk_size=chunk_size, max_process_count=max_process_count, max_tasks_per_child=max_tasks_per_child)
 
-def update_map(selected_kabko, chunk_size=100, tanggal=None, predict_days=PREDICT_DAYS, update_prediction=True, updater=None, db=None, max_process_count=None, max_tasks_per_child=2):
+def update_map(selected_kabko, chunk_size=100, tanggal=None, predict_days=PREDICT_DAYS, update_prediction=True, update_real=False, updater=None, db=None, max_process_count=None, max_tasks_per_child=2):
     #print("Updating maps of %s" % (selected_kabko,))
     updater = updater or get_updater(chunk_size=chunk_size)
     
@@ -66,7 +66,7 @@ def update_map(selected_kabko, chunk_size=100, tanggal=None, predict_days=PREDIC
         kabko = MapDataRepo.get_kabko_full(selected_kabko, cur)
         
     real_data = MapDataReal.shift(real_data, FIRST_TANGGAL)
-    done2, chunk_size2 = _update_map(updater, REAL_LAYER_ID, selected_kabko, real_data, update=False, chunk_size=chunk_size, max_process_count=max_process_count, max_tasks_per_child=max_tasks_per_child)
+    done2, chunk_size2 = _update_map(updater, REAL_LAYER_ID, selected_kabko, real_data, update=update_real, chunk_size=chunk_size, max_process_count=max_process_count, max_tasks_per_child=max_tasks_per_child)
     #gc.collect()
     done += done2
     chunk_size = min(chunk_size, chunk_size2)
@@ -88,7 +88,7 @@ def cache_geometry(updater=None, first_tanggal=FIRST_TANGGAL_STR):
     layer = updater.get_layer(REAL_LAYER_ID)
     updater.cache_kabko_geometry(layer, util.format_date(first_tanggal))
     
-def update_map_all(predict_days=PREDICT_DAYS, update_prediction=True, any=True, max_process_count=None, max_tasks_per_child=10, pool=None, inner_max_process_count=1, inner_max_tasks_per_child=100):
+def update_map_all(any=True, predict_days=PREDICT_DAYS, update_prediction=True, update_real=False, max_process_count=None, max_tasks_per_child=10, pool=None, inner_max_process_count=1, inner_max_tasks_per_child=100):
     latest_tanggal = None
     with database.get_conn() as conn, conn.cursor() as cur:
         #latest_tanggal = MapDataRepo.get_latest_tanggal(cur)
@@ -106,7 +106,7 @@ def update_map_all(predict_days=PREDICT_DAYS, update_prediction=True, any=True, 
     print("Updating maps of %s kabko" % (str(len(kabko)),))
     updater = None#get_updater()
     
-    args = [(*k, latest_tanggal, predict_days, update_prediction, updater, database.singleton, inner_max_process_count, inner_max_tasks_per_child) for k in kabko]
+    args = [(*k, latest_tanggal, predict_days, update_prediction, update_real, updater, database.singleton, inner_max_process_count, inner_max_tasks_per_child) for k in kabko]
     
     if not pool and max_process_count == 1:
         for arg in args:
